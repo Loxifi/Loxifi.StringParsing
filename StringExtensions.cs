@@ -173,6 +173,7 @@ namespace Loxifi
             return i >= 0 ? inclusive ? s[..(i + toText.Length)] : s[..i] : s;
         }
 
+#if !NETSTANDARD2_0
         //https://medium.com/@SergioPedri/optimizing-string-count-all-the-way-from-linq-to-hardware-accelerated-vectorized-instructions-186816010ad9
         internal static int VectorizedCount(this string source, char c)
         {
@@ -256,15 +257,23 @@ namespace Loxifi
 
             return result;
         }
+#else
+        static class Vector
+        {
+            public static bool IsHardwareAccelerated => false;
+		}
 
-        /// <summary>
-        /// Splits a string into a dictionary as denoted by the provided K/V separator and KVP delimeter characters
-        /// </summary>
-        /// <param name="source">The source string to split</param>
-        /// <param name="delimeter">The character that separates the key value pairs</param>
-        /// <param name="separator">The character that separates the key and value within the pair</param>
-        /// <returns>A dictionary representing the values</returns>
-        public static Dictionary<string, string> ToDictionary(this string source, char delimeter = ';', char separator = '=')
+        public static int VectorizedCount(this string source, char c) => throw new NotImplementedException();
+#endif
+
+		/// <summary>
+		/// Splits a string into a dictionary as denoted by the provided K/V separator and KVP delimeter characters
+		/// </summary>
+		/// <param name="source">The source string to split</param>
+		/// <param name="delimeter">The character that separates the key value pairs</param>
+		/// <param name="separator">The character that separates the key and value within the pair</param>
+		/// <returns>A dictionary representing the values</returns>
+		public static Dictionary<string, string> ToDictionary(this string source, char delimeter = ';', char separator = '=')
         {
             if (source is null)
             {
